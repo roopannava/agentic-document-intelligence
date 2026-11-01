@@ -1,0 +1,391 @@
+<meta charset="utf-8">
+<title>Claude Tool-Use Cheatsheet</title>
+<style>
+  /* Layout: single scannable reference column of titled cards; color encodes WHO acts —
+     clay = Claude / Anthropic's server, green = your code, amber = exam traps. */
+  :root {
+    --bg: #f6f4ef;
+    --surface: #ffffff;
+    --surface-2: #faf8f3;
+    --fg: #1d1b18;
+    --muted: #6d675d;
+    --border: #e4e0d6;
+    --code-bg: #f1eee7;
+    --claude: #bb522c;        /* Claude / the model / the server */
+    --claude-soft: #fbe8e0;
+    --you: #2d7a4d;           /* your code */
+    --you-soft: #e4f1ea;
+    --warn: #a9741a;          /* traps */
+    --warn-soft: #f6ecd7;
+    --accent: #bb522c;
+    --font-sans: "IBM Plex Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #191714;
+      --surface: #232019;
+      --surface-2: #1f1c16;
+      --fg: #ece8e0;
+      --muted: #a39d90;
+      --border: #332f28;
+      --code-bg: #26221b;
+      --claude: #e2906d;
+      --claude-soft: #352119;
+      --you: #71c492;
+      --you-soft: #19291f;
+      --warn: #d8ab52;
+      --warn-soft: #2e2615;
+      --accent: #e2906d;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #191714;
+    --surface: #232019;
+    --surface-2: #1f1c16;
+    --fg: #ece8e0;
+    --muted: #a39d90;
+    --border: #332f28;
+    --code-bg: #26221b;
+    --claude: #e2906d;
+    --claude-soft: #352119;
+    --you: #71c492;
+    --you-soft: #19291f;
+    --warn: #d8ab52;
+    --warn-soft: #2e2615;
+    --accent: #e2906d;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    margin: 0;
+  }
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 40px 64px;
+  }
+
+  header.masthead { margin-bottom: 28px; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--claude);
+    margin: 0 0 8px;
+  }
+  h1 {
+    font-size: clamp(28px, 6vw, 40px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0 0 10px;
+  }
+  .lede { color: var(--muted); max-width: 62ch; margin: 0; font-size: 15px; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 8px 16px;
+    margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); }
+  .dot { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+  .dot.claude { background: var(--claude); }
+  .dot.you { background: var(--you); }
+  .dot.warn { background: var(--warn); }
+
+  section.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 22px 24px;
+    margin-top: 18px;
+  }
+  .card > h2 {
+    font-size: 19px; font-weight: 700; letter-spacing: -0.01em;
+    margin: 0 0 4px; display: flex; align-items: baseline; gap: 10px;
+  }
+  .card > h2 .num {
+    font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+    color: var(--claude); flex: none;
+  }
+  .card > .sub { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
+
+  p { margin: 0 0 12px; }
+  p:last-child { margin-bottom: 0; }
+  strong { font-weight: 600; }
+  .mono { font-family: var(--font-mono); font-size: 0.92em; }
+  code {
+    font-family: var(--font-mono); font-size: 0.86em;
+    background: var(--code-bg); padding: 1px 5px; border-radius: 5px;
+    word-break: break-word;
+  }
+  .claude-t { color: var(--claude); font-weight: 600; }
+  .you-t { color: var(--you); font-weight: 600; }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    margin: 0 0 14px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  .c-key { color: var(--claude); }
+  .c-you { color: var(--you); }
+  .c-com { color: var(--muted); font-style: italic; }
+
+  .table-wrap { overflow-x: auto; min-width: 0; margin: 0 0 6px;
+    border: 1px solid var(--border); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; padding: 9px 13px; vertical-align: top; border-bottom: 1px solid var(--border); }
+  th { background: var(--surface-2); font-weight: 600; font-size: 12px; letter-spacing: 0.02em;
+    text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  td.mono, th.mono { font-family: var(--font-mono); white-space: nowrap; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px) { .cols { grid-template-columns: 1fr; } }
+  .mini {
+    border-radius: 10px; padding: 14px 16px; border: 1px solid var(--border);
+  }
+  .mini.claude { background: var(--claude-soft); border-color: color-mix(in srgb, var(--claude) 35%, var(--border)); }
+  .mini.you { background: var(--you-soft); border-color: color-mix(in srgb, var(--you) 35%, var(--border)); }
+  .mini h3 { margin: 0 0 8px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  .mini.claude h3 { color: var(--claude); }
+  .mini.you h3 { color: var(--you); }
+  .mini ul { margin: 0; padding-left: 18px; font-size: 13.5px; }
+  .mini li { margin-bottom: 5px; }
+  .mini li:last-child { margin-bottom: 0; }
+
+  .trap td:first-child { color: var(--warn); font-weight: 600; white-space: nowrap; }
+  .pill { display: inline-block; font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    padding: 1px 7px; border-radius: 999px; background: var(--warn-soft); color: var(--warn);
+    border: 1px solid color-mix(in srgb, var(--warn) 30%, var(--border)); }
+
+  .rule-list { list-style: none; padding: 0; margin: 0; }
+  .rule-list li { padding-left: 26px; position: relative; margin-bottom: 10px; }
+  .rule-list li::before {
+    content: "→"; position: absolute; left: 0; top: 0;
+    color: var(--accent); font-family: var(--font-mono); font-weight: 600;
+  }
+  .rule-list li:last-child { margin-bottom: 0; }
+
+  footer { margin-top: 26px; color: var(--muted); font-size: 12.5px; text-align: center;
+    font-family: var(--font-mono); }
+
+  @media print {
+    body { background: #fff; }
+    section.card { break-inside: avoid; border-color: #ccc; }
+  }
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">Claude Certified Foundation Architect · Revision Card</p>
+    <h1>Tool Use &amp; the Agentic Loop</h1>
+    <p class="lede">The concepts tricky exam questions hinge on — what a tool really is, the <span class="mono">stop_reason</span> loop, the <span class="mono">tool_use</span>/<span class="mono">tool_result</span> exchange, who creates what, and the traps.</p>
+    <div class="legend">
+      <span><span class="dot claude"></span> Claude / Anthropic's server does this</span>
+      <span><span class="dot you"></span> Your code does this</span>
+      <span><span class="dot warn"></span> Common trap</span>
+    </div>
+  </header>
+
+  <section class="card">
+    <h2><span class="num">01</span> What a Tool actually is</h2>
+    <p class="sub">The single idea everything else follows from.</p>
+    <p>A <strong>tool is a description</strong> (a JSON schema) you advertise to the model — <strong>not a method, not code</strong>. Claude runs on Anthropic's servers, <strong>outside your JVM</strong>; it cannot call your Java, your DB, or anything. All it can do is produce text.</p>
+    <p>So "tool use" is a <strong>protocol, not a function call</strong>: <span class="claude-t">Claude requests</span> a tool (as text), and <span class="you-t">your code</span> actually runs the work and returns the result. Think of it as an <strong>interface signature</strong> (what you publish) vs. the <strong>implementation</strong> (your method). Claude only ever sees and requests the signature.</p>
+    <p><em>Menu vs. kitchen:</em> you hand Claude a menu (tool definitions); it writes an order ticket (<code>tool_use</code>); your code is the kitchen that cooks it (<code>tool_result</code>).</p>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">02</span> The tool spec — exactly three fields</h2>
+    <p class="sub">What you send in the request's <span class="mono">tools</span> array.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Field</th><th>Required?</th><th>Purpose</th></tr>
+        <tr><td class="mono">name</td><td>Yes</td><td>The label Claude calls it by, and the string you match in dispatch.</td></tr>
+        <tr><td class="mono">description</td><td>Yes (in practice)</td><td>How Claude decides <em>when</em> to use it.</td></tr>
+        <tr><td class="mono">input_schema</td><td>Yes</td><td>JSON Schema of the arguments. For a no-arg tool, an <strong>empty object</strong>.</td></tr>
+      </table>
+    </div>
+    <pre><code><span class="c-com">// A no-argument tool — note: NO "id", NO "type"</span>
+{
+  <span class="c-key">"name"</span>: "getMethodOne",
+  <span class="c-key">"description"</span>: "Return all stocks.",
+  <span class="c-key">"input_schema"</span>: { "type": "object", "properties": {} }   <span class="c-com">// empty = no args</span>
+}</code></pre>
+    <ul class="rule-list">
+      <li>A tool definition has <strong>no <code>id</code></strong> — the <code>id</code> is generated by the server at call time.</li>
+      <li>A tool definition has <strong>no <code>"type": "tool_use"</code></strong> — that appears only on the <em>response</em> block.</li>
+      <li><code>input_schema</code> is required <em>even with no arguments</em> — use <code>{"type":"object","properties":{}}</code>.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">03</span> The agentic loop &amp; <span class="mono" style="font-size:0.8em">stop_reason</span></h2>
+    <p class="sub"><span class="claude-t">Claude's</span> <code>stop_reason</code> drives <span class="you-t">your</span> control flow. Read it once per turn, then branch.</p>
+    <pre><code><span class="c-you">loop</span>:
+  response = client.messages().create(messages, tools)   <span class="c-com">// one TURN = one call</span>
+  stop = response.stopReason()
+  <span class="c-you">if</span> stop == <span class="c-key">TOOL_USE</span>:
+      run the requested tool(s)
+      append the assistant turn + a user message with tool_result(s)
+      <span class="c-you">continue</span>                                       <span class="c-com">// feed results back, loop</span>
+  <span class="c-you">else</span>:  <span class="c-com">// END_TURN (or terminal) → done</span>
+      return the final text</code></pre>
+    <div class="table-wrap">
+      <table>
+        <tr><th class="mono">stop_reason</th><th>Meaning</th><th>Your move</th></tr>
+        <tr><td class="mono">tool_use</td><td>Claude wants a tool</td><td>Run it, return tool_result, loop</td></tr>
+        <tr><td class="mono">end_turn</td><td>Finished naturally</td><td>Stop — read the text</td></tr>
+        <tr><td class="mono">max_tokens</td><td>Hit the output cap</td><td>Truncated — continue/retry</td></tr>
+        <tr><td class="mono">stop_sequence</td><td>Hit a custom stop string</td><td>Per your logic</td></tr>
+        <tr><td class="mono">refusal</td><td>Safety decline</td><td>Handle gracefully (don't read content)</td></tr>
+        <tr><td class="mono">pause_turn</td><td>Long server-tool still running</td><td>Resume the turn</td></tr>
+      </table>
+    </div>
+    <p style="margin-top:14px"><strong>Minimum correct loop:</strong> handle <code>tool_use</code>; let everything else mean "stop." You read <code>stop_reason</code> <strong>once</strong> into a variable — not a line per case.</p>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">04</span> The exchange: <span class="mono" style="font-size:0.8em">tool_use</span> ↔ <span class="mono" style="font-size:0.8em">tool_result</span></h2>
+    <p class="sub">A matched pair, linked by a correlation id — like request/reply messaging.</p>
+    <pre><code><span class="c-key">Claude sends →</span>  { "type": "tool_use",    "id": "toolu_A",         "name": "getMethodOne", "input": {} }
+<span class="c-you">You send back →</span> { "type": "tool_result", "tool_use_id": "toolu_A", "content": "&lt;stocks&gt;" }</code></pre>
+    <ul class="rule-list">
+      <li>Same id, <strong>different field name</strong>: <code>id</code> on the tool_use, <code>tool_use_id</code> on the tool_result. You <strong>echo it verbatim</strong> — it's the correlation key.</li>
+      <li><code>content</code> is a <strong>string</strong>. If your method returns an object/list, serialize to JSON first (only text crosses the wire).</li>
+      <li>The <code>tool_result</code> goes in a <strong><code>role: "user"</code> message</strong>, not assistant.</li>
+      <li><code>"type": "tool_use"</code> is a <strong>discriminator</strong> the server stamps on each response block so you know its kind (<code>text</code>, <code>tool_use</code>, <code>thinking</code>…).</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">05</span> Who creates what</h2>
+    <p class="sub">Exam questions love to flip this. The boundary is the network.</p>
+    <div class="cols">
+      <div class="mini claude">
+        <h3><span class="dot claude"></span> Claude / the server</h3>
+        <ul>
+          <li>The message id <code>msg_…</code></li>
+          <li>Each tool-call id <code>toolu_…</code> (fresh per call)</li>
+          <li><code>stop_reason</code></li>
+          <li>The <code>"type"</code> discriminator on each block</li>
+          <li>The <em>decision</em> of which tool to call &amp; the <code>input</code> values</li>
+        </ul>
+      </div>
+      <div class="mini you">
+        <h3><span class="dot you"></span> Your code</h3>
+        <ul>
+          <li>The tool definitions (name, description, schema)</li>
+          <li>The dispatch — match <code>name</code> → run the method</li>
+          <li>Echoing <code>toolu_…</code> back on the tool_result</li>
+          <li>Carrying the full conversation forward each turn</li>
+          <li>The <code>max_tokens</code>, model, system prompt</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:14px">Rule of thumb: any <strong>underscore-prefixed id in a response</strong> (<code>msg_</code>, <code>toolu_</code>) was made by the server. You never generate ids.</p>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">06</span> Dispatch — name → method</h2>
+    <p class="sub">The tool name is the <strong>routing key</strong>. Your code is the caller, not Claude.</p>
+    <pre><code><span class="c-com">// Keep the name in a constant so definition &amp; dispatch can't drift</span>
+<span class="c-you">if</span> (<span class="c-key">GET_METHOD_ONE</span>.equals(name)) result = service.getMethodOne();   <span class="c-com">// YOUR code calls YOUR class</span></code></pre>
+    <ul class="rule-list">
+      <li>Tool name ≠ Java method name — <strong>independent</strong>. Only the <em>declared name</em> and the <em>dispatch string</em> must match.</li>
+      <li><code>name</code> is a <strong>router</strong> (which method), not an argument. The argument is the tool's <code>input</code>.</li>
+      <li>Claude's <code>tool_use</code> is the <em>trigger</em>; <strong>your orchestrator is the actual caller</strong> — a plain in-JVM call.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">07</span> Parallel tool use</h2>
+    <p class="sub">One turn can contain several <code>tool_use</code> blocks. Run them concurrently — like threads.</p>
+    <ul class="rule-list">
+      <li><strong>Within a turn:</strong> independent tool calls run in parallel (an <code>ExecutorService</code> / <code>parallelStream</code>), then you <em>join</em> the results.</li>
+      <li><strong>Across turns:</strong> strictly <strong>sequential</strong> — each turn needs the previous turn's results before deciding.</li>
+      <li><strong>Hard rule:</strong> return <em>all</em> <code>tool_result</code>s in <strong>one</strong> user message. Splitting them trains Claude to stop calling in parallel.</li>
+      <li>Your methods must be thread-safe (independent read-only queries are fine).</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">08</span> Two doors to Claude — API vs Bedrock</h2>
+    <p class="sub">Same model, different front door, auth, billing, and model-id format.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th></th><th>Anthropic API</th><th>Amazon Bedrock</th></tr>
+        <tr><td>Endpoint receives the HTTP</td><td class="mono">api.anthropic.com</td><td class="mono">bedrock-runtime.&lt;region&gt;</td></tr>
+        <tr><td>Auth</td><td>API key (<span class="mono">ANTHROPIC_API_KEY</span>)</td><td>AWS IAM (no key)</td></tr>
+        <tr><td>Model id</td><td class="mono">claude-haiku-5-5</td><td class="mono">us.anthropic.claude-haiku-4-5-…</td></tr>
+        <tr><td>Billing</td><td>Anthropic invoice</td><td>Your AWS bill</td></tr>
+      </table>
+    </div>
+    <p style="margin-top:14px">Neither is "Claude receiving HTTP" — a <strong>server</strong> receives it, then runs the model (GPUs) behind it, and stamps the ids + <code>stop_reason</code> onto the response.</p>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">09</span> The traps</h2>
+    <p class="sub">The exact gotchas tricky questions are built from.</p>
+    <div class="table-wrap">
+      <table class="trap">
+        <tr><th>Tempting but wrong</th><th>Correct</th></tr>
+        <tr><td>Tool = a function the model runs</td><td>A description; the model can't execute — <strong>your code</strong> runs it</td></tr>
+        <tr><td>Tool name must equal the method name</td><td>Independent; only the dispatch string must match the declared name</td></tr>
+        <tr><td>No-arg tool needs no schema</td><td><code>input_schema</code> is required — empty object</td></tr>
+        <tr><td>Force a tool with <code>tool_choice</code></td><td><span class="pill">Claude 5</span> forced <code>any</code>/<code>tool</code> → <strong>400</strong>. Use <code>auto</code> + a clear instruction, or structured output</td></tr>
+        <tr><td>The model remembers prior turns</td><td><strong>Stateless</strong> — resend the full conversation each turn</td></tr>
+        <tr><td>You create the <code>toolu_</code> id</td><td>The <strong>server</strong> creates it; you echo it back</td></tr>
+        <tr><td>Send parallel results in separate messages</td><td>All <code>tool_result</code>s in <strong>one</strong> user message</td></tr>
+        <tr><td>Skip appending the assistant turn</td><td>Append the assistant response <em>before</em> the tool_result, or history breaks</td></tr>
+        <tr><td>Leaving <code>max_tokens</code> unset is fine</td><td>It reserves the model's <strong>max</strong> → silent throttling (esp. Bedrock)</td></tr>
+        <tr><td>Use an agent for everything</td><td>Fixed sequence = <strong>workflow</strong>; model-driven decisions = <strong>agent</strong></td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">10</span> Workflow vs Agent · Structured output vs Tool</h2>
+    <div class="cols">
+      <div class="mini you">
+        <h3>Workflow vs Agent</h3>
+        <ul>
+          <li><strong>Workflow</strong> — code controls a fixed sequence (upload → extract → categorize). Deterministic steps.</li>
+          <li><strong>Agent</strong> — the model decides which tools to call and when to stop. Use only when the task is open-ended.</li>
+          <li>Don't wrap deterministic steps (an S3 upload) in an LLM agent.</li>
+        </ul>
+      </div>
+      <div class="mini claude">
+        <h3>Structured output vs Tool</h3>
+        <ul>
+          <li>Both can return typed JSON that matches a schema.</li>
+          <li>If a tool existed <em>only</em> to force JSON back, prefer <strong>structured output</strong>.</li>
+          <li>Use <strong>tools</strong> when the model must trigger an <em>action</em> (your code runs something).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>stop_reason == end_turn</footer>
+</div>
