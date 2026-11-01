@@ -14,7 +14,7 @@
 
 set -euo pipefail
 
-PDF="${1:-$HOME/Downloads/test.pdf}"
+PDF="${1:-$(dirname "$0")/samples/sample_statement.pdf}"
 URL="http://localhost:8080/api/agentic/process-pdf"
 OUT="/tmp/agentic_pdf_resp.json"
 

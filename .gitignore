@@ -23,3 +23,5 @@ app.env
 
 # PDFs — this app processes bank statements; never commit them.
 *.pdf
+# ...except the synthetic demo statement (fictional data) for quick testing.
+!samples/sample_statement.pdf
