@@ -54,6 +54,8 @@ sequenceDiagram
 
 ## 2. Flowchart — the `stop_reason` decision loop
 
+![stop_reason decision loop](flow-loop.png)
+
 ```mermaid
 flowchart TD
     A[POST /process-pdf with a PDF] --> B[AgenticController.processPdf]
