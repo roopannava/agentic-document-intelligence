@@ -1,0 +1,25 @@
+# Build output
+target/
+build/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+# Local secrets / config — NEVER commit these
+.env
+.env.*
+*.local
+aws_creds.env
+anthropic.env
+app.env
+
+# PDFs — this app processes bank statements; never commit them.
+*.pdf
