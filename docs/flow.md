@@ -4,6 +4,8 @@ The multi-agent document-intelligence flow: the lead orchestrator uploads the PD
 then drives a `stop_reason` loop that delegates to **Amazon Textract** (deterministic tool)
 and two **Claude subagents** (categorize, research), and finally summarizes.
 
+![Agentic pipeline sequence diagram](flow-sequence.png)
+
 > To render in mermaid.live / mermaid.ai, paste **only** the lines of ONE diagram below —
 > start at `sequenceDiagram` or `flowchart TD`, and do **not** include the ```` ```mermaid ````
 > fence lines or anything else from this file.
